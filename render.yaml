@@ -1,27 +1,28 @@
-# Render blueprint — https://render.com
-# Start a new Web Service on Render, connect the repo,
-# set BOT_TOKEN / ADMIN_PASSWORD / WEBAPP_URL in Environment,
-# and this file makes it run 24/7 automatically.
-services:
-  - type: web
-    name: mlplay
-    runtime: python
-    plan: free
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "python run.py"
-    healthCheckPath: /health
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.9
-      - key: BOT_TOKEN
-        sync: false
-      - key: ADMIN_PASSWORD
-        sync: false
-      - key: WEBAPP_URL
-        sync: false
-      - key: DATABASE_URL
-        value: sqlite:////var/data/mlplay.db
-    disk:
-      name: mlplay-data
-      mountPath: /var/data
-      sizeGB: 1
+      # Render blueprint — https://render.com
+      # FREE-TIER FRIENDLY: no persistent disk required (free services don't support disks).
+      #
+      # Persistence: free tier has no disk, so set DATABASE_URL to a free managed
+      # Postgres (Neon / Supabase) -> postgresql+psycopg2://user:pass@host/db
+      # Without it, the app uses local SQLite (./data) which resets on each redeploy.
+      #
+      # Keep-alive: free instances sleep after ~15 min of inbound inactivity.
+      # Ping https://<your-app>.onrender.com/health every 5 min (UptimeRobot free) to stay 24/7.
+      services:
+        - type: web
+          name: mlplay
+          runtime: python
+          plan: free
+          buildCommand: "pip install -r requirements.txt"
+          startCommand: "python run.py"
+          healthCheckPath: /health
+          envVars:
+            - key: PYTHON_VERSION
+              value: 3.11.9
+            - key: BOT_TOKEN
+              sync: false
+            - key: ADMIN_PASSWORD
+              sync: false
+            - key: WEBAPP_URL
+              sync: false
+            - key: DATABASE_URL
+              sync: false
