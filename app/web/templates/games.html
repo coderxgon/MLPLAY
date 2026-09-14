@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Games & Winrate{% endblock %}
+{% block h1 %}🎮 Games & Winrate{% endblock %}
+{% block content %}
+<div class="card">
+  <h3>🎖️ Rank-up bonuses (₱ awarded when reaching each rank)</h3>
+  <p class="muted">Auto-credited to the user the moment they qualify for a new rank (via deposits &amp; valid bets).</p>
+  <form id="rankbonus-form" class="row wrap">
+    {% for r in ranks %}
+    <label class="mini-label">{{ r.name }}
+      <input class="inp" type="number" step="0.5" min="0" name="{{ r.key }}" value="{{ rank_bonus.get(r.key, 0) }}">
+    </label>
+    {% endfor %}
+    <button class="btn primary" type="submit">💾 Save Bonuses</button>
+  </form>
+  <script>
+    document.getElementById('rankbonus-form').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const f = new FormData(this);
+      const body = {};
+      for (const [k,v] of f.entries()) body[k] = +v || 0;
+      await postJSON('/admin/rankbonus/save', body);
+    });
+  </script>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <h3>🎯 Global win rate per game</h3>
+    <p class="muted">The probability a bettor WINS on each game (default 30%). Per-user overrides below beat this.</p>
+    <form id="winrate-form" class="stack">
+      <label>⚔️ Rank Game — win rate % <input class="inp" type="number" step="1" min="0" max="100" name="rank" value="{{ (winrate.rank*100)|int }}"></label>
+      <label>🏆 Who's The MVP? — win rate % <input class="inp" type="number" step="1" min="0" max="100" name="mvp" value="{{ (winrate.mvp*100)|int }}"></label>
+      <label>🎭 HeRole — win rate % <input class="inp" type="number" step="1" min="0" max="100" name="herole" value="{{ (winrate.herole*100)|int }}"></label>
+      <button class="btn primary" type="submit">💾 Save</button>
+    </form>
+    <script>
+      document.getElementById('winrate-form').addEventListener('submit', async function(e){
+        e.preventDefault();
+        const f = new FormData(this);
+        const body = {rank: +f.get('rank')/100, mvp: +f.get('mvp')/100, herole: +f.get('herole')/100};
+        await postJSON('/admin/winrate/save', body);
+      });
+    </script>
+  </div>
+
+  <div class="card">
+    <h3>📊 Game performance</h3>
+    <table class="tbl">
+      <tr><th>Game</th><th>Bets</th><th>Won</th><th>Staked</th><th>Paid out</th></tr>
+      {% for g, s in stats.items() %}
+      <tr>
+        <td>{{ {'rank':'⚔️ Rank Game','mvp':'🏆 MVP','herole':'🎭 HeRole'}[g] }}</td>
+        <td>{{ s.bets }}</td><td>{{ s.won }}</td>
+        <td>₱{{ "{:,.2f}".format(s.taken) }}</td><td>₱{{ "{:,.2f}".format(s.paid) }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <h3>🎛 Per-user win rate overrides</h3>
+  <p class="muted">Find the user's TG ID in the Users page, then set individual win rates (100% = always wins).</p>
+  <form id="ov-form" class="row">
+    <input class="inp" type="number" name="tg_id" placeholder="TG ID" required>
+    <select class="inp" name="game">
+      <option value="rank">⚔️ Rank Game</option>
+      <option value="mvp">🏆 MVP</option>
+      <option value="herole">🎭 HeRole</option>
+    </select>
+    <input class="inp" type="number" step="1" min="0" max="100" name="rate" placeholder="Win %" required>
+    <button class="btn primary" type="submit">➕ Set override</button>
+  </form>
+  <script>
+    document.getElementById('ov-form').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const f = new FormData(this);
+      await postJSON('/admin/winrate/user', {tg_id: +f.get('tg_id'), game: f.get('game'), rate: +f.get('rate')/100});
+      this.reset();
+    });
+  </script>
+  <table class="tbl">
+    <tr><th>TG ID</th><th>Name</th><th>Override (rank / mvp / herole)</th><th></th></tr>
+    {% for u in overrides %}
+    <tr>
+      <td class="mono">{{ u.tg_id }}</td>
+      <td>{{ u.tg_fullname or u.tg_username }}</td>
+      <td>{{ u.winrate_override }}</td>
+      <td><button class="btn mini danger" onclick="postJSON('/admin/winrate/user/remove',{tg_id:{{ u.tg_id }}},true)">Remove</button></td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

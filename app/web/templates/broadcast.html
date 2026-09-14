@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Broadcast{% endblock %}
+{% block h1 %}📣 Broadcast{% endblock %}
+{% block content %}
+<div class="grid2">
+  <div class="card">
+    <h3>📨 Send message to all users</h3>
+    <form method="post" action="/admin/broadcast/send" enctype="multipart/form-data" class="stack">
+      <textarea class="inp" name="text" rows="4" placeholder="Message text (supports Telegram HTML-ish bold/italic/newlines)"></textarea>
+      <label class="file"><input type="file" name="image" accept="image/*"> 📷 Optional image</label>
+      <input class="inp" type="text" name="button_text" placeholder="Button text (optional)">
+      <input class="inp" type="text" name="button_url" placeholder="Button URL (optional)">
+      <select class="inp" name="target_rank">
+        <option value="">👥 All users</option>
+        {% for r in ranks %}
+        <option value="{{ r.key }}">{{ r.tier }} {{ r.name }}</option>
+        {% endfor %}
+      </select>
+      <button class="btn primary" type="submit">📣 Send Broadcast</button>
+      <small class="muted">Broadcast runs in the background; users who blocked the bot are counted as failed.</small>
+    </form>
+  </div>
+  <div class="card">
+    <h3>📜 Broadcast history</h3>
+    <table class="tbl">
+      <tr><th>#</th><th>Text</th><th>Target</th><th>Progress</th><th>Status</th><th></th></tr>
+      {% for j in jobs %}
+      <tr>
+        <td>{{ j.id }}</td>
+        <td><small>{{ j.text[:50] }}</small></td>
+        <td>{{ j.target_rank or "All" }}</td>
+        <td class="mono">{{ j.done }}/{{ j.total }}{% if j.failed %} ({{ j.failed }} failed){% endif %}</td>
+        <td><span class="badge {{ j.status }}">{{ j.status }}</span></td>
+        <td>{% if j.status in ["pending","running"] %}<button class="btn mini danger" onclick="postJSON('/admin/broadcast/cancel',{id:{{ j.id }}})">Cancel</button>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

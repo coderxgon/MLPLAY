@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Promotions & Promo Codes{% endblock %}
+{% block h1 %}🎁 Promotions & Promo Codes{% endblock %}
+{% block content %}
+<div class="grid2">
+  <div class="card">
+    <h3>🎉 Promotions (mini app page)</h3>
+    <form method="post" action="/admin/promotions/add" enctype="multipart/form-data" class="stack">
+      <input class="inp" type="text" name="title" placeholder="Title" required>
+      <textarea class="inp" name="text" rows="3" placeholder="Promotion text (supports new lines)"></textarea>
+      <input class="inp" type="text" name="url" placeholder="Optional link URL">
+      <label class="check"><input type="checkbox" name="active" value="1" checked> Active</label>
+      <label class="file"><input type="file" name="image" accept="image/*"> 📷 Upload image</label>
+      <button class="btn primary" type="submit">➕ Add Promotion</button>
+    </form>
+    <table class="tbl">
+      <tr><th>Title</th><th>Image</th><th>Active</th><th></th></tr>
+      {% for p in promotions %}
+      <tr>
+        <td>{{ p.title }}<br><small>{{ p.text[:60] }}</small></td>
+        <td>{% if p.image_path %}<a class="btn mini" href="{{ p.image_path }}" target="_blank">🖼</a>{% endif %}</td>
+        <td><span class="badge {{ 'approved' if p.active else 'rejected' }}">{{ 'ON' if p.active else 'OFF' }}</span></td>
+        <td class="actions">
+          <button class="btn mini" onclick="postJSON('/admin/promotions/toggle',{id:{{ p.id }}})">Toggle</button>
+          <button class="btn mini danger" onclick="postJSON('/admin/promotions/delete',{id:{{ p.id }}},true)">🗑</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>🔑 Promo Codes (user enters in mini app)</h3>
+    <form method="post" action="/admin/promos/add" class="stack">
+      <input class="inp" type="text" name="code" placeholder="CODE (e.g. ML2026)" required>
+      <input class="inp" type="text" name="title" placeholder="Title (e.g. Launch bonus)">
+      <input class="inp" type="number" step="0.01" name="amount" placeholder="Reward ₱ amount" required>
+      <input class="inp" type="number" name="uses_max" placeholder="Max uses (0 = unlimited)">
+      <input class="inp" type="date" name="expires" placeholder="Expiry date (optional)">
+      <button class="btn primary" type="submit">➕ Add Code</button>
+    </form>
+    <table class="tbl">
+      <tr><th>Code</th><th>Reward</th><th>Uses</th><th>Expiry</th><th>State</th><th></th></tr>
+      {% for p in promos %}
+      <tr>
+        <td class="mono"><b>{{ p.code }}</b></td>
+        <td>₱{{ "{:,.2f}".format(p.amount) }}</td>
+        <td>{{ p.uses_count }}/{{ p.uses_max if p.uses_max else "∞" }}</td>
+        <td>{{ p.expires_at.strftime("%Y-%m-%d") if p.expires_at else "—" }}</td>
+        <td><span class="badge {{ 'approved' if p.active else 'rejected' }}">{{ 'ON' if p.active else 'OFF' }}</span></td>
+        <td class="actions">
+          <button class="btn mini" onclick="postJSON('/admin/promos/toggle',{id:{{ p.id }}})">Toggle</button>
+          <button class="btn mini danger" onclick="postJSON('/admin/promos/delete',{id:{{ p.id }}},true)">🗑</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

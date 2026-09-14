@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Payment Methods{% endblock %}
+{% block h1 %}💳 Payment Methods{% endblock %}
+{% block content %}
+<div class="grid2">
+  <div class="card">
+    <h3>💰 Deposit Methods</h3>
+    <details class="panel">
+      <summary>➕ Add deposit method</summary>
+      <form method="post" action="/admin/payments/method" enctype="multipart/form-data" class="stack">
+        <input class="inp" type="text" name="name" placeholder="Method name (e.g. GCash)" required>
+        <textarea class="inp" name="detail" rows="3" placeholder="QR text / account details shown to user"></textarea>
+        <div class="row">
+          <input class="inp" type="number" step="0.01" name="min" value="1" placeholder="Min">
+          <input class="inp" type="number" step="0.01" name="max" value="50000" placeholder="Max">
+        </div>
+        <label class="file"><input type="file" name="image" accept="image/*"> 📷 Optional banner/QR image</label>
+        <label class="check"><input type="checkbox" name="active" value="1" checked> Active</label>
+        <button class="btn primary" type="submit">➕ Add</button>
+      </form>
+    </details>
+    <table class="tbl">
+      <tr><th>Name</th><th>Min/Max</th><th>QR</th><th>State</th><th></th></tr>
+      {% for m in methods %}
+      <tr>
+        <td>{{ m.name }}</td>
+        <td>₱{{ m.min_amount }} – ₱{{ m.max_amount }}</td>
+        <td><a class="btn mini" href="/media/qr/{{ m.id }}.png" target="_blank">🖼</a></td>
+        <td><span class="badge {{ 'approved' if m.active else 'rejected' }}">{{ 'ON' if m.active else 'OFF' }}</span></td>
+        <td class="actions">
+          <button class="btn mini" onclick="postJSON('/admin/payments/toggle',{kind:'method',id:{{ m.id }}})">Toggle</button>
+          <button class="btn mini danger" onclick="postJSON('/admin/payments/delete',{kind:'method',id:{{ m.id }}},true)">🗑</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>💸 Withdrawal Channels</h3>
+    <details class="panel">
+      <summary>➕ Add withdrawal channel</summary>
+      <form method="post" action="/admin/payments/channel" class="stack">
+        <input class="inp" type="text" name="name" placeholder="Channel name (e.g. GCash)" required>
+        <div class="row">
+          <input class="inp" type="number" step="0.01" name="min" value="1" placeholder="Min">
+          <input class="inp" type="number" step="0.01" name="max" value="50000" placeholder="Max">
+        </div>
+        <label>Form fields (JSON list — these are what the user fills in):
+          <textarea class="inp mono" name="fields" rows="6">[{"key":"account_number","label":"Account / Wallet Number","placeholder":"0917 123 4567","type":"text"},{"key":"account_name","label":"Account Holder Name","placeholder":"Juan Dela Cruz","type":"text"}]</textarea>
+        </label>
+        <label class="check"><input type="checkbox" name="active" value="1" checked> Active</label>
+        <button class="btn primary" type="submit">➕ Add</button>
+      </form>
+    </details>
+    <table class="tbl">
+      <tr><th>Name</th><th>Min/Max</th><th>Fields</th><th>State</th><th></th></tr>
+      {% for c in channels %}
+      <tr>
+        <td>{{ c.name }}</td>
+        <td>₱{{ c.min_amount }} – ₱{{ c.max_amount }}</td>
+        <td><small class="mono">{{ c.fields[:60] }}</small></td>
+        <td><span class="badge {{ 'approved' if c.active else 'rejected' }}">{{ 'ON' if c.active else 'OFF' }}</span></td>
+        <td class="actions">
+          <button class="btn mini" onclick="postJSON('/admin/payments/toggle',{kind:'channel',id:{{ c.id }}})">Toggle</button>
+          <button class="btn mini danger" onclick="postJSON('/admin/payments/delete',{kind:'channel',id:{{ c.id }}},true)">🗑</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    <p class="muted">💡 Push payment channels can also be added right in the transaction group via admin — every request is posted there for quick approve/reject.</p>
+  </div>
+</div>
+{% endblock %}

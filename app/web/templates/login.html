@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MLPlay Admin — Login</title>
+<link rel="stylesheet" href="/static/admin.css">
+</head>
+<body class="login-body">
+  <div class="login-card">
+    <div class="brand big">⚡</div>
+    <h1>MLPLAY <b>ADMIN</b></h1>
+    <p>Control center — powers of the arena</p>
+    {% if error %}<div class="alert warn">{{ error }}</div>{% endif %}
+    <form method="post" action="/admin/login">
+      <input class="inp" type="password" name="password" placeholder="Admin password" autofocus required>
+      <button class="btn primary block" type="submit">🔐 Login</button>
+    </form>
+    <small>Default password: MLPlay-Admin-2026 (change it in settings or env ADMIN_PASSWORD)</small>
+  </div>
+</body>
+</html>

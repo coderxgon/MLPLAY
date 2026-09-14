@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Users{% endblock %}
+{% block h1 %}👥 Users{% endblock %}
+{% block content %}
+<div class="card">
+  <form class="row" method="get" action="/admin/users">
+    <input class="inp grow" type="text" name="q" value="{{ q }}" placeholder="Search by name, @username or TG ID…">
+    <button class="btn primary" type="submit">🔍 Search</button>
+  </form>
+  <p class="muted">{{ total }} user(s) • page {{ page }}/{{ pages }}</p>
+  <table class="tbl">
+    <tr>
+      <th>ID</th><th>Name</th><th>Username</th><th>Rank</th><th>Balance</th>
+      <th>Deposits</th><th>Withdraws</th><th>Bets</th><th>Wallet</th><th>Status</th><th>Joined</th><th>Actions</th>
+    </tr>
+    {% for u in users %}
+    <tr>
+      <td class="mono">{{ u.tg_id }}</td>
+      <td>{{ u.fullname }}</td>
+      <td>@{{ u.username }}</td>
+      <td>{{ u.rank.tier }} {{ u.rank.name }}</td>
+      <td><b>₱{{ "{:,.2f}".format(u.balance) }}</b></td>
+      <td>₱{{ "{:,.2f}".format(u.total_deposit) }}</td>
+      <td>₱{{ "{:,.2f}".format(u.total_withdraw) }}</td>
+      <td>{{ u.valid_bets }}</td>
+      <td>
+        {% if u.bind_account %}<small>{{ u.bind_name }} • {{ u.bind_account }}</small>
+        {% else %}<span class="muted">—</span>{% endif %}
+      </td>
+      <td>
+        {% if u.is_banned %}<span class="badge rejected">BANNED</span>{% endif %}
+        {% if u.is_suspended %}<span class="badge pending">SUSPENDED</span>{% endif %}
+        {% if u.balance_frozen %}<span class="badge rejected">FROZEN</span>{% endif %}
+        {% if not u.is_banned and not u.is_suspended and not u.balance_frozen %}<span class="badge approved">OK</span>{% endif %}
+      </td>
+      <td>{{ u.joined_at[:10] if u.joined_at }}</td>
+      <td class="actions">
+        {% if not u.is_banned %}<button class="btn mini danger" onclick="userAction({{ u.tg_id }},'ban')">Ban</button>{% else %}<button class="btn mini" onclick="userAction({{ u.tg_id }},'unban')">Unban</button>{% endif %}
+        {% if not u.is_suspended %}<button class="btn mini warn" onclick="userAction({{ u.tg_id }},'suspend')">Suspend</button>{% else %}<button class="btn mini" onclick="userAction({{ u.tg_id }},'unsuspend')">Unsuspend</button>{% endif %}
+        {% if not u.balance_frozen %}<button class="btn mini warn" onclick="userAction({{ u.tg_id }},'freeze')">Freeze</button>{% else %}<button class="btn mini" onclick="userAction({{ u.tg_id }},'unfreeze')">Unfreeze</button>{% endif %}
+        <button class="btn mini" onclick="userAction({{ u.tg_id }},'add_balance')">+Add</button>
+        <button class="btn mini" onclick="userAction({{ u.tg_id }},'remove_balance')">−Remove</button>
+        <button class="btn mini" onclick="bindUser({{ u.tg_id }})">🏦 Bind</button>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="12" class="empty">No users found</td></tr>
+    {% endfor %}
+  </table>
+  {% if pages > 1 %}
+  <div class="pager">
+    {% if page > 1 %}<a class="btn mini" href="/admin/users?q={{ q }}&page={{ page-1 }}">◀ Prev</a>{% endif %}
+    <span>{{ page }} / {{ pages }}</span>
+    {% if page < pages %}<a class="btn mini" href="/admin/users?q={{ q }}&page={{ page+1 }}">Next ▶</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

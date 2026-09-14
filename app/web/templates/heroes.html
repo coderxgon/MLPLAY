@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Heroes{% endblock %}
+{% block h1 %}🦸 Heroes{% endblock %}
+{% block content %}
+
+<div class="card">
+  <h3>➕ Add New Hero</h3>
+  <form method="post" action="/admin/heroes/add" enctype="multipart/form-data" class="row wrap">
+    <input class="inp" type="text" name="name" placeholder="Hero name" required>
+    <input class="inp" type="text" name="title" placeholder="Title (e.g. Iron Guardian)">
+    <select class="inp" name="role">
+      <option value="tank">Tank</option>
+      <option value="fighter" selected>Fighter</option>
+      <option value="assassin">Assassin</option>
+      <option value="mage">Mage</option>
+      <option value="support">Support</option>
+      <option value="marksman">Marksman</option>
+    </select>
+    <input class="inp short" type="text" name="emoji" placeholder="⚔️">
+    <input class="inp colpick" type="color" name="color1" value="#7C3AED" title="Color 1">
+    <input class="inp colpick" type="color" name="color2" value="#1E1B4B" title="Color 2">
+    <input class="inp short" type="number" name="hp" value="800" title="HP">
+    <input class="inp short" type="number" name="atk" value="120" title="ATK">
+    <input class="inp short" type="number" name="spd" value="70" title="SPD">
+    <label class="file inline"><input type="file" name="image" accept="image/*"> 🖼 Portrait</label>
+    <button class="btn primary" type="submit">➕ Add Hero</button>
+  </form>
+</div>
+
+<div class="grid2">
+  {% for h in heroes %}
+  <div class="card hero-card">
+    <div class="hero-head" style="--c1:{{ h.color1 }};--c2:{{ h.color2 }}">
+      {% if h.image_path %}
+        <img src="{{ h.image_path }}" class="hero-photo">
+      {% else %}
+        <div class="hero-bust" style="background:linear-gradient(135deg,{{ h.color1 }},{{ h.color2 }})">{{ h.name[0] }}</div>
+      {% endif %}
+      <div>
+        <b>{{ h.emoji }} {{ h.name }}</b>
+        <small>{{ h.title }}</small>
+        <span class="badge {{ 'approved' if h.active else 'rejected' }}">{{ h.role|upper }} • {{ 'ON' if h.active else 'OFF' }}</span>
+      </div>
+    </div>
+    <form method="post" action="/admin/heroes/save" enctype="multipart/form-data" class="stack hero-fields">
+      <input type="hidden" name="id" value="{{ h.id }}">
+      <div class="row">
+        <input class="inp" type="text" name="name" value="{{ h.name }}" placeholder="Name">
+        <input class="inp" type="text" name="title" value="{{ h.title }}" placeholder="Title">
+      </div>
+      <div class="row">
+        <select class="inp" name="role">
+          {% for r in ["tank","fighter","assassin","mage","support","marksman"] %}
+          <option value="{{ r }}" {{ 'selected' if h.role==r }}>{{ r|title }}</option>
+          {% endfor %}
+        </select>
+        <input class="inp short" type="text" name="emoji" value="{{ h.emoji }}">
+        <input class="inp colpick" type="color" name="color1" value="{{ h.color1 }}">
+        <input class="inp colpick" type="color" name="color2" value="{{ h.color2 }}">
+        <input class="inp short" type="number" name="hp" value="{{ h.hp }}">
+        <input class="inp short" type="number" name="atk" value="{{ h.atk }}">
+        <input class="inp short" type="number" name="spd" value="{{ h.spd }}">
+      </div>
+      <div class="row">
+        <label class="check"><input type="checkbox" name="active" value="1" {% if h.active %}checked{% endif %}> Active</label>
+        <label class="file inline"><input type="file" name="image" accept="image/*"> 🖼 Replace</label>
+        {% if h.image_path %}<label class="check"><input type="checkbox" name="reset_image" value="1"> Reset</label>{% endif %}
+        <button class="btn primary" type="submit">💾 Save</button>
+      </div>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

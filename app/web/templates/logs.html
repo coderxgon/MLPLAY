@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Action Logs{% endblock %}
+{% block h1 %}🧾 Action Logs{% endblock %}
+{% block content %}
+<div class="card">
+  <table class="tbl">
+    <tr><th>Time</th><th>Admin</th><th>Action</th><th>Target TG ID</th><th>Title</th><th>Remark</th></tr>
+    {% for r in rows %}
+    <tr>
+      <td class="mono">{{ r.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+      <td>{{ r.admin }}</td>
+      <td><span class="badge approved">{{ r.action }}</span></td>
+      <td class="mono">{{ r.target_tg_id or "—" }}</td>
+      <td>{{ r.title }}</td>
+      <td>{{ r.remark }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="empty">No actions logged yet</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

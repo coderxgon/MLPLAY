@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ "Deposits" if kind=='deposit' else "Withdrawals" }} Requests{% endblock %}
+{% block h1 %}{{ "💰 Deposit Requests" if kind=='deposit' else "💸 Withdrawal Requests" }}{% endblock %}
+{% block content %}
+<div class="row">
+  {% for st in ["pending","approved","rejected"] %}
+  <a class="chip {{ 'on' if status==st }}" href="/admin/{{ 'deposits' if kind=='deposit' else 'withdrawals' }}?status={{ st }}">{{ st|upper }}</a>
+  {% endfor %}
+</div>
+<div class="card">
+  <table class="tbl">
+    <tr><th>Order</th><th>User</th><th>Amount</th><th>Channel</th><th>Details</th><th>Receipt</th><th>Time</th><th>Status</th><th>Action</th></tr>
+    {% for o in rows %}
+    <tr>
+      <td class="mono">{{ o.order_no }}</td>
+      <td>{{ o.user.fullname }}<br><small class="mono">@{{ o.user.username }} ({{ o.user.tg_id }})</small></td>
+      <td><b>₱{{ "{:,.2f}".format(o.amount) }}</b></td>
+      <td>{{ o.title }}</td>
+      <td>
+        {% for k,v in o.detail_obj.items() %}<small><b>{{ k }}</b>: {{ v }}</small><br>{% endfor %}
+      </td>
+      <td>{% if o.receipt_path %}<a class="btn mini" href="{{ o.receipt_path }}" target="_blank">🖼 Receipt</a>{% else %}—{% endif %}</td>
+      <td>{{ o.created_at[:16] }}</td>
+      <td><span class="badge {{ o.status }}">{{ o.status }}</span></td>
+      <td class="actions">
+        {% if o.status == "pending" %}
+        <button class="btn mini" onclick="orderAction({{ o.id }},'approve')">✅ Approve</button>
+        <button class="btn mini warn" onclick="orderAction({{ o.id }},'reject')">❌ Reject</button>
+        <button class="btn mini danger" onclick="orderAction({{ o.id }},'reject_ban')">⛔ Reject+Ban</button>
+        {% else %}
+        <small>{{ o.handled_by or "" }}</small>
+        {% if o.remark %}<small>📝 {{ o.remark }}</small>{% endif %}
+        {% endif %}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="9" class="empty">No requests</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

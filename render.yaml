@@ -1,0 +1,27 @@
+# Render blueprint — https://render.com
+# Start a new Web Service on Render, connect the repo,
+# set BOT_TOKEN / ADMIN_PASSWORD / WEBAPP_URL in Environment,
+# and this file makes it run 24/7 automatically.
+services:
+  - type: web
+    name: mlplay
+    runtime: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python run.py"
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: BOT_TOKEN
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: WEBAPP_URL
+        sync: false
+      - key: DATABASE_URL
+        value: sqlite:////var/data/mlplay.db
+    disk:
+      name: mlplay-data
+      mountPath: /var/data
+      sizeGB: 1

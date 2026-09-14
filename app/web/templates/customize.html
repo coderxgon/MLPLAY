@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Customize{% endblock %}
+{% block h1 %}⚙️ Customize{% endblock %}
+{% block content %}
+<div class="row tabs">
+  <a class="chip {{ 'on' if not tab or tab=='general' }}" href="/admin/customize">General</a>
+  <a class="chip {{ 'on' if tab=='channels' }}" href="/admin/customize?tab=channels">Channels</a>
+  <a class="chip {{ 'on' if tab=='csr' }}" href="/admin/customize?tab=csr">CSR Links</a>
+  <a class="chip {{ 'on' if tab=='admins' }}" href="/admin/customize?tab=admins">Admins</a>
+</div>
+
+{% if not tab or tab == "general" %}
+<div class="grid2">
+  <div class="card">
+    <h3>🤖 Bot & platform</h3>
+    <form method="post" action="/admin/customize/general" enctype="multipart/form-data" class="stack">
+      <label>🔑 Bot token (from @BotFather)
+        <input class="inp" type="password" name="bot_token" value="{{ settings.bot_token }}" placeholder="123456:ABC… (leave as-is to keep current)">
+      </label>
+      <label>🌐 Mini App URL (your Render HTTPS URL)
+        <input class="inp" type="text" name="webapp_url" value="{{ settings.webapp_url }}" placeholder="https://mlplay.onrender.com">
+      </label>
+      <label>💬 Welcome text
+        <textarea class="inp" name="welcome_text" rows="4">{{ settings.welcome_text }}</textarea>
+      </label>
+      <label>🤝 Referral reward % (of invitee's first deposit)
+        <input class="inp" type="number" step="0.5" name="referral_pct" value="{{ settings.referral_pct }}">
+      </label>
+      <label>🎁 Daily bonus (₱)
+        <input class="inp" type="number" step="0.5" name="daily_bonus" value="{{ settings.daily_bonus }}">
+      </label>
+      <label class="check"><input type="checkbox" name="maintenance" value="1" {% if settings.maintenance %}checked{% endif %}> ⏸️ Maintenance mode (blocks betting & deposits)</label>
+      <label>🖼 Bot logo (used on all cards)
+        <input class="file" type="file" name="logo" accept="image/*">
+      </label>
+      <label>🖼 Welcome card image (used on /start)
+        <input class="file" type="file" name="welcome_media" accept="image/*">
+      </label>
+      <label class="check"><input type="checkbox" name="reset_welcome" value="1"> Regenerate default welcome card</label>
+      <button class="btn primary" type="submit">💾 Save</button>
+      <small class="muted">Token changes hot-reload the bot within ~15 seconds — no restart needed.</small>
+    </form>
+  </div>
+  <div class="card">
+    <h3>📡 Live channels for updates</h3>
+    <form method="post" action="/admin/customize/channels" class="stack">
+      <label>⚔️ Game updates channel <small>(match open + result posts)</small>
+        <input class="inp" type="text" name="game_channel" value="{{ settings.game_channel }}" placeholder="@MyChannel or -1001234567890">
+      </label>
+      <label>💳 Transaction group <small>(deposit/withdraw requests + approve buttons)</small>
+        <input class="inp" type="text" name="tx_group" value="{{ settings.tx_group }}" placeholder="@MyGroup or -1001234567890">
+      </label>
+      <label>🔔 Actions group <small>(bans, freezes, notices)</small>
+        <input class="inp" type="text" name="action_group" value="{{ settings.action_group }}" placeholder="@MyGroup or -1001234567890">
+      </label>
+      <button class="btn primary" type="submit">💾 Save Channels</button>
+      <small class="muted">Use a channel/group link like @name, or numeric ID (get it by forwarding a message to @userinfobot / @getidsbot). The bot must be admin.</small>
+    </form>
+  </div>
+</div>
+{% elif tab == "csr" %}
+<div class="card">
+  <h3>📞 Customer service links</h3>
+  <form method="post" action="/admin/customize/csr" class="stack">
+    <input class="inp" type="text" name="csr_group" value="{{ settings.csr_group }}" placeholder="Group link https://t.me/…">
+    <input class="inp" type="text" name="csr_channel" value="{{ settings.csr_channel }}" placeholder="Channel link https://t.me/…">
+    <input class="inp" type="text" name="csr1" value="{{ settings.csr1 }}" placeholder="CSR 1 link">
+    <input class="inp" type="text" name="csr2" value="{{ settings.csr2 }}" placeholder="CSR 2 link">
+    <input class="inp" type="text" name="csr3" value="{{ settings.csr3 }}" placeholder="CSR 3 link">
+    <button class="btn primary" type="submit">💾 Save CSR Links</button>
+  </form>
+</div>
+{% elif tab == "admins" %}
+<div class="card">
+  <h3>👨‍💼 Admin Telegram IDs (max 10)</h3>
+  <p class="muted">Only these IDs can approve/reject requests from the transaction group. Get IDs from @userinfobot.</p>
+  <form method="post" action="/admin/customize/admins" class="stack">
+    <textarea class="inp" name="admin_ids" rows="3" placeholder="123456789, 987654321">{{ settings.admin_ids|join(", ") }}</textarea>
+    <button class="btn primary" type="submit">💾 Save Admins</button>
+  </form>
+</div>
+{% endif %}
+{% endblock %}

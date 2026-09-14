@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block h1 %}📊 Dashboard{% endblock %}
+{% block content %}
+<div class="stats">
+  <div class="stat"><span>👥 Total Users</span><b>{{ stats.users }}</b></div>
+  <div class="stat"><span>💰 Total Deposited</span><b>₱{{ "{:,.2f}".format(stats.deposits) }}</b></div>
+  <div class="stat"><span>💸 Total Withdrawn</span><b>₱{{ "{:,.2f}".format(stats.withdrawals) }}</b></div>
+  <div class="stat"><span>🎁 Total Rewarded</span><b>₱{{ "{:,.2f}".format(stats.rewarded) }}</b></div>
+  <div class="stat warn"><span>💰 Pending Deposits</span><b>{{ stats.pending_dep }}</b></div>
+  <div class="stat warn"><span>💸 Pending Withdrawals</span><b>{{ stats.pending_wdr }}</b></div>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <h3>💵 Deposits — last 7 days</h3>
+    <div class="bars">
+      {% for d in week %}
+      <div class="bar-col"><div class="bar" style="height:{{ (d.total/maxw*120)|int + 2 }}px"></div><span>{{ d.label }}</span><i>₱{{ d.total }}</i></div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="card">
+    <h3>🎮 Game stats</h3>
+    <table class="tbl">
+      <tr><th>Game</th><th>Bets</th><th>Paid out</th></tr>
+      <tr><td>⚔️ Rank Game</td><td>{{ game_stats.rank.bets }}</td><td>₱{{ "{:,.2f}".format(game_stats.rank.paid) }}</td></tr>
+      <tr><td>🏆 MVP</td><td>{{ game_stats.mvp.bets }}</td><td>₱{{ "{:,.2f}".format(game_stats.mvp.paid) }}</td></tr>
+      <tr><td>🎭 HeRole</td><td>{{ game_stats.herole.bets }}</td><td>₱{{ "{:,.2f}".format(game_stats.herole.paid) }}</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <h3>🧾 Recent transactions</h3>
+  <table class="tbl">
+    <tr><th>Order</th><th>Kind</th><th>Amount</th><th>Status</th><th>Time</th></tr>
+    {% for o in recent %}
+    <tr>
+      <td class="mono">{{ o.order_no }}</td>
+      <td>{{ o.kind }}</td>
+      <td>₱{{ "{:,.2f}".format(o.amount) }}</td>
+      <td><span class="badge {{ o.status }}">{{ o.status }}</span></td>
+      <td>{{ o.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5" class="empty">No transactions yet</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}
